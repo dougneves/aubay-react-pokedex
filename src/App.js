@@ -1,36 +1,61 @@
 import React, { Component } from 'react';
-import Pokemon from './Pokemon';
 import axios from 'axios';
 import './App.css';
 
+import { Link } from 'react-router-dom';
+
 class App extends Component {
-  constructor(props) {
-    super(props);
+    constructor(props) {
+        super(props);
 
-    this.state = {
-      loaded: false,
-      pokemons: []
-    };
-  }
+        this.state = {
+            loaded: false,
+            pokemons: [],
+            nextUrl: null
+        };
 
-  async componentDidMount() { 
-    const pokemons = await axios.get('https://pokeapi.co/api/v2/pokemon');
+        this.loadMore = this.loadMore.bind(this);
+    }
 
-    this.setState({
-      loaded: true,
-      pokemons: pokemons.data.results
-    });
-  }
+    async loadMore() {
+        const { nextUrl } = this.state;
+        const pokemons = await axios.get(nextUrl || 'https://pokeapi.co/api/v2/pokemon');
 
-  render() {
-    const { loaded, pokemons } = this.state;
+        this.setState(function(state) {
+            return {
+                loaded: true,
+                pokemons: [...state.pokemons, ...pokemons.data.results],
+                nextUrl: pokemons.data.next
+            };
+        });
+    }
 
-    if (loaded) return pokemons.map(function (item) {
-      return <Pokemon key={item.name} name={item.name} url={item.url} />;
-    });
+    componentDidMount() {
+        this.loadMore();
+    }
 
-    return <div>loading...</div>;
-  }
+    render() {
+        const { loaded, pokemons, nextUrl } = this.state;
+
+        if (loaded)
+            return (
+                <div>
+                    {pokemons.map(function(item) {
+                        return (
+                            <div key={item.name}>
+                                <Link to={`/pokemon/${item.name}`}>{item.name}</Link>
+                            </div>
+                        );
+                    })}
+                    {false}
+                    {null}
+                    {undefined}
+                    {nextUrl && <button onClick={this.loadMore}>Load more!</button>}
+                </div>
+            );
+
+        return <div>loading...</div>;
+    }
 }
 
 export default App;

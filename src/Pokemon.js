@@ -13,9 +13,9 @@ class Pokemon extends Component {
     }
 
     async componentDidMount() {
-        const { url } = this.props;
+        const { name } = this.props.match.params;
 
-        const pokemons = await axios.get(url);
+        const pokemons = await axios.get(`https://pokeapi.co/api/v2/pokemon/${name}`);
 
         this.setState({
             loaded: true,
@@ -25,7 +25,7 @@ class Pokemon extends Component {
 
     render() {
         const { loaded, data } = this.state;
-        const { name } = this.props;
+        const { name } = this.props.match.params;
 
         if (loaded) {
             return <div>
